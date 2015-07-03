@@ -10,11 +10,49 @@ import android.os.Message;
 import android.util.Log;
 
 public class MyService extends Service {
+
+    public interface Callback
+    {
+        public void sendMess(int i);
+    }
+
+    public class MyBinder extends Binder
+    {
+        String i;
+        MyService.Callback callback = null;
+
+        public MyBinder() {
+
+        }
+
+        public MyBinder(String i, MyService.Callback callback) {
+            this.i = i;
+            this.callback = callback;
+        }
+
+        public Callback getCallback() {
+            return callback;
+        }
+
+        public void setCallback(Callback callback) {
+            this.callback = callback;
+        }
+
+        public String getI() {
+            return i;
+        }
+
+        public void setI(String i) {
+            this.i = i;
+        }
+    }
+
     private boolean flag = false;
-    Handler handler;
+
 
     public MyService() {
     }
+
 
     @Override
     public void onCreate() {
@@ -68,66 +106,30 @@ public class MyService extends Service {
     public IBinder onBind(Intent intent) {
         Log.w("+++++++++++++","service onBind");
         flag = true;
-        final MyBinder b = new MyBinder("1");
+        final MyBinder b = new MyBinder();
 
         new Thread(new Runnable() {
             int i=0;
             @Override
             public void run() {
-                while(handler==null) {
-                    handler = b.getHandler();
-//                    handler = new Handler();
+
+                while(true) {
+                    if (b.getCallback() != null)
+                        break;
                 }
                 while(flag)
                 {
-
-                    Message mess = new Message();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("data", "data" + i);
-                    mess.setData(bundle);
-                    try{
-                        Thread.sleep(1000);
-                        handler.sendMessage(mess);
-                    }catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    Log.w("+++++++++++++",""+i);
+                    b.getCallback().sendMess(i);
                     i++;
                 }
-                handler=null;
+                b.setCallback(null);
             }
         }).start();
 
         return b;
     }
 
-    public class MyBinder extends Binder
-    {
-        String i;
 
-        Handler handler = null;
 
-        public Handler getHandler() {
-            return handler;
-        }
-
-        public void setHandler(Handler handler) {
-            this.handler = handler;
-        }
-
-        public MyBinder(String i) {
-            this.i = i;
-        }
-
-        public String getI() {
-            return i;
-        }
-
-        public void setI(String i) {
-            this.i = i;
-        }
-    }
 
 }

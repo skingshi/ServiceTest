@@ -32,6 +32,7 @@ public class MainActivity extends Activity implements View.OnClickListener,Servi
         Button unbindServiceBtn = (Button)findViewById(R.id.unBindBtn);
         tv = (TextView)findViewById(R.id.tv);
         service = new Intent(this,MyService.class);
+
         handler = new Handler()
         {
             @Override
@@ -57,9 +58,27 @@ public class MainActivity extends Activity implements View.OnClickListener,Servi
     public void onServiceConnected(ComponentName name, IBinder service) {
 
 
-        Log.w("handler1",handler.toString());
-        ((MyService.MyBinder) service).setHandler(handler);
         Log.w("+++++++++++++", "service connect");
+        ((MyService.MyBinder)service).setCallback(new MyService.Callback() {
+            @Override
+            public void sendMess(int i) {
+
+                Message mess = new Message();
+                Bundle bundle = new Bundle();
+                bundle.putString("data", "data" + i);
+                mess.setData(bundle);
+                try {
+                    Thread.sleep(1000);
+                    handler.sendMessage(mess);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Log.w("+++++++++++++", "" + i);
+            }
+        });
+
+
+
 
     }
 
