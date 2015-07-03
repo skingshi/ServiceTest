@@ -13,7 +13,7 @@ public class MyService extends Service {
 
     public interface Callback
     {
-        public void sendMess(int i);
+         void sendMess(int i);
     }
 
     public class MyBinder extends Binder
@@ -48,7 +48,7 @@ public class MyService extends Service {
     }
 
     private boolean flag = false;
-
+    public MyBinder b = null;
 
     public MyService() {
     }
@@ -63,6 +63,7 @@ public class MyService extends Service {
     @Override
     public void onDestroy() {
         flag = false;
+        b=null;
 
         Log.w("+++++++++++++","service OnDestroy");
         super.onDestroy();
@@ -106,7 +107,8 @@ public class MyService extends Service {
     public IBinder onBind(Intent intent) {
         Log.w("+++++++++++++","service onBind");
         flag = true;
-        final MyBinder b = new MyBinder();
+
+        b = new MyBinder();
 
         new Thread(new Runnable() {
             int i=0;
@@ -117,12 +119,10 @@ public class MyService extends Service {
                     if (b.getCallback() != null)
                         break;
                 }
-                while(flag)
-                {
+                while(flag) {
                     b.getCallback().sendMess(i);
                     i++;
                 }
-                b.setCallback(null);
             }
         }).start();
 
